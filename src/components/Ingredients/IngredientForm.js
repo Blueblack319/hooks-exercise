@@ -4,12 +4,12 @@ import Card from "../UI/Card";
 import "./IngredientForm.css";
 
 const IngredientForm = (props) => {
-  const [inputState, setInputState] = useState({ name: "", amount: "" });
+  const [enteredTitle, setEnteredTitle] = useState("");
+  const [enteredAmount, setEnteredAmount] = useState("");
   const submitHandler = (event) => {
     event.preventDefault();
     // ...
   };
-  console.log(inputState);
 
   return (
     <section className="ingredient-form">
@@ -20,14 +20,8 @@ const IngredientForm = (props) => {
             <input
               type="text"
               id="title"
-              value={inputState.name}
-              onChange={(event) => {
-                const name = event.target.value;
-                setInputState((prevInputState) => ({
-                  name,
-                  amount: prevInputState.amount,
-                }));
-              }}
+              value={enteredTitle}
+              onChange={(event) => setEnteredTitle(event.target.value)}
             />
           </div>
           <div className="form-control">
@@ -35,14 +29,8 @@ const IngredientForm = (props) => {
             <input
               type="number"
               id="amount"
-              value={inputState.amount}
-              onChange={(event) => {
-                const amount = event.target.value;
-                setInputState((prevInputState) => ({
-                  name: prevInputState.name,
-                  amout: amount,
-                }));
-              }}
+              value={enteredAmount}
+              onChange={(event) => setEnteredAmount(event.target.value)}
             />
           </div>
           <div className="ingredient-form__actions">
