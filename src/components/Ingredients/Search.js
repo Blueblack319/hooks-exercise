@@ -1,9 +1,9 @@
-import React from 'react';
+import React from "react";
 
-import Card from '../UI/Card';
-import './Search.css';
+import Card from "../UI/Card";
+import "./Search.css";
 
-const Search = React.memo(props => {
+const Search = (props) => {
   return (
     <section className="search">
       <Card>
@@ -14,6 +14,6 @@ const Search = React.memo(props => {
       </Card>
     </section>
   );
-});
+};
 
-export default Search;
+export default React.memo(Search);
