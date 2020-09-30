@@ -6,15 +6,15 @@ import "./IngredientForm.css";
 const IngredientForm = (props) => {
   const [enteredTitle, setEnteredTitle] = useState("");
   const [enteredAmount, setEnteredAmount] = useState("");
-  const submitHandler = (event) => {
+  const handleFormSubmitted = (event) => {
     event.preventDefault();
-    // ...
+    props.addIngredient({ title: enteredTitle, amount: enteredAmount });
   };
 
   return (
     <section className="ingredient-form">
       <Card>
-        <form onSubmit={submitHandler}>
+        <form onSubmit={handleFormSubmitted}>
           <div className="form-control">
             <label htmlFor="title">Name</label>
             <input
