@@ -1,13 +1,32 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import IngredientForm from "./IngredientForm";
 import IngredientList from "./IngredientList";
 import Search from "./Search";
 
+const BASE_URL = "https://hooks-exercise.firebaseio.com/";
+
 function Ingredients() {
   const [ingredients, setIngredients] = useState([]);
+
+  useEffect(() => {
+    fetch(`${BASE_URL}ingredients.json`)
+      .then((res) => res.json())
+      .then((resData) => {
+        const fetchedIngredients = [];
+        for (let key in resData) {
+          fetchedIngredients.push({
+            id: key,
+            title: resData[key].title,
+            amount: resData[key].amount,
+          });
+        }
+        setIngredients(fetchedIngredients);
+      });
+  }, []);
+
   const handleIngredientAdded = (ingredient) => {
-    fetch("https://hooks-exercise.firebaseio.com/ingredients.json", {
+    fetch(`${BASE_URL}ingredients.json`, {
       method: "post",
       headers: {
         "Content-Type": "application/json",
@@ -15,11 +34,11 @@ function Ingredients() {
       body: JSON.stringify(ingredient),
     })
       .then((res) => res.json())
-      .then((ing) =>
+      .then((ing) => {
         setIngredients((prevIngredients) =>
           prevIngredients.concat({ id: ing.name, ...ingredient })
-        )
-      );
+        );
+      });
     // try {
     //   const ingsRes = await fetch(
     //     "https://hooks-exercise.firebaseio.com/ingredients.json",
