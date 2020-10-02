@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useReducer } from "react";
 
 import IngredientForm from "./IngredientForm";
 import IngredientList from "./IngredientList";
@@ -7,8 +7,21 @@ import ErrorModal from "../UI/ErrorModal";
 
 const BASE_URL = "https://hooks-exercise.firebaseio.com/";
 
+const ingredientsReducer = (currentIngredients, action) => {
+  // eslint-disable-next-line default-case
+  switch (action.type) {
+    case "SET":
+      return action.ingredients;
+    case "ADD":
+      return currentIngredients.concat(action.ingredient);
+    case "REMOVE":
+      return currentIngredients.filter((ing) => ing.id !== action.id);
+  }
+};
+
 function Ingredients() {
-  const [ingredients, setIngredients] = useState([]);
+  // const [ingredients, setIngredients] = useState([]);
+  const [ingredients, ingredientsDispatch] = useReducer(ingredientsReducer, []);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(null);
 
@@ -23,9 +36,10 @@ function Ingredients() {
     })
       .then((res) => res.json())
       .then((ing) => {
-        setIngredients((prevIngredients) =>
-          prevIngredients.concat({ id: ing.name, ...ingredient })
-        );
+        ingredientsDispatch({
+          type: "ADD",
+          ingredient: { id: ing.name, ...ingredient },
+        });
         setIsLoading(false);
       })
       .catch((err) => {
@@ -35,7 +49,7 @@ function Ingredients() {
   };
 
   const handleIngredientsLoaded = useCallback((loadedIngredients) => {
-    setIngredients(loadedIngredients); // setIngredients is specialfuction created by useState. So you can ommit dependency.
+    ingredientsDispatch({ type: "SET", ingredients: loadedIngredients });
   }, []);
 
   const handleIngredientRemoved = (id) => {
@@ -44,9 +58,7 @@ function Ingredients() {
       method: "DELETE",
     })
       .then((res) => {
-        setIngredients((prevIngredients) =>
-          prevIngredients.filter((ing) => ing.id !== id)
-        );
+        ingredientsDispatch({ type: "REMOVE", id });
         setIsLoading(false);
       })
       .catch((err) => {
