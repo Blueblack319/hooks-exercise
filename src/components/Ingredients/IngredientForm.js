@@ -2,13 +2,14 @@ import React, { useState } from "react";
 
 import Card from "../UI/Card";
 import "./IngredientForm.css";
+import LoadingIndicator from "../UI/LoadingIndicator";
 
 const IngredientForm = (props) => {
   const [enteredTitle, setEnteredTitle] = useState("");
   const [enteredAmount, setEnteredAmount] = useState("");
   const handleFormSubmitted = (event) => {
     event.preventDefault();
-    props.addIngredient({ title: enteredTitle, amount: enteredAmount });
+    props.onIngredientAdded({ title: enteredTitle, amount: enteredAmount });
   };
 
   return (
@@ -35,6 +36,7 @@ const IngredientForm = (props) => {
           </div>
           <div className="ingredient-form__actions">
             <button type="submit">Add Ingredient</button>
+            {props.isLoading && <LoadingIndicator />}
           </div>
         </form>
       </Card>

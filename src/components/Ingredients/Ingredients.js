@@ -1,19 +1,19 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 
 import IngredientForm from "./IngredientForm";
 import IngredientList from "./IngredientList";
 import Search from "./Search";
+import ErrorModal from "../UI/ErrorModal";
 
 const BASE_URL = "https://hooks-exercise.firebaseio.com/";
 
 function Ingredients() {
   const [ingredients, setIngredients] = useState([]);
-
-  useEffect(() => {
-    console.log("RENDERING INGREDIENTS", ingredients);
-  }, [ingredients]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(null);
 
   const handleIngredientAdded = (ingredient) => {
+    setIsLoading(true);
     fetch(`${BASE_URL}ingredients.json`, {
       method: "post",
       headers: {
@@ -26,6 +26,11 @@ function Ingredients() {
         setIngredients((prevIngredients) =>
           prevIngredients.concat({ id: ing.name, ...ingredient })
         );
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        setIsError(err);
+        setIsLoading(false);
       });
   };
 
@@ -34,19 +39,37 @@ function Ingredients() {
   }, []);
 
   const handleIngredientRemoved = (id) => {
+    setIsLoading(true);
     fetch(`${BASE_URL}ingredients/${id}.json`, {
       method: "DELETE",
-    }).then((res) => {
-      setIngredients((prevIngredients) =>
-        prevIngredients.filter((ing) => ing.id !== id)
-      );
-    });
+    })
+      .then((res) => {
+        setIngredients((prevIngredients) =>
+          prevIngredients.filter((ing) => ing.id !== id)
+        );
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        setIsError(err);
+        setIsLoading(false);
+      });
+  };
+
+  const handleErrorClosed = () => {
+    setIsError(null);
   };
 
   return (
     <div className="App">
-      <IngredientForm addIngredient={handleIngredientAdded} />
-
+      {isError && (
+        <ErrorModal onClose={handleErrorClosed}>
+          Something went wrong!
+        </ErrorModal>
+      )}
+      <IngredientForm
+        onIngredientAdded={handleIngredientAdded}
+        isLoading={isLoading}
+      />
       <section>
         <Search onIngredientsLoaded={handleIngredientsLoaded} />
         <IngredientList
