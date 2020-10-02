@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 
 import IngredientForm from "./IngredientForm";
 import IngredientList from "./IngredientList";
@@ -10,20 +10,8 @@ function Ingredients() {
   const [ingredients, setIngredients] = useState([]);
 
   useEffect(() => {
-    fetch(`${BASE_URL}ingredients.json`)
-      .then((res) => res.json())
-      .then((resData) => {
-        const fetchedIngredients = [];
-        for (let key in resData) {
-          fetchedIngredients.push({
-            id: key,
-            title: resData[key].title,
-            amount: resData[key].amount,
-          });
-        }
-        setIngredients(fetchedIngredients);
-      });
-  }, []);
+    console.log("RENDERING INGREDIENTS", ingredients);
+  }, [ingredients]);
 
   const handleIngredientAdded = (ingredient) => {
     fetch(`${BASE_URL}ingredients.json`, {
@@ -39,33 +27,11 @@ function Ingredients() {
           prevIngredients.concat({ id: ing.name, ...ingredient })
         );
       });
-    // try {
-    //   const ingsRes = await fetch(
-    //     "https://hooks-exercise.firebaseio.com/ingredients.json",
-    //     {
-    //       method: "POST",
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //       },
-    //       body: JSON.stringify(ingredient),
-    //     }
-    //   );
-    //   const ings = await ingsRes.json();
-    //   setIngredients(
-    //     // (prevIngredients) => [
-    //     //   ...prevIngredients,
-    //     //   { id: Math.random.toString(), ...ingredient },
-    //     // ]
-    //     (prevIngredients) =>
-    //       prevIngredients.concat({
-    //         id: ings.name,
-    //         ...ingredient,
-    //       })
-    //   );
-    // } catch (err) {
-    //   console.log(err);
-    // }
   };
+
+  const handleIngredientsLoaded = useCallback((loadedIngredients) => {
+    setIngredients(loadedIngredients); // setIngredients is specialfuction created by useState. So you can ommit dependency.
+  }, []);
 
   const handleIngredientRemoved = (id) => {
     setIngredients((prevIngredients) =>
@@ -78,7 +44,7 @@ function Ingredients() {
       <IngredientForm addIngredient={handleIngredientAdded} />
 
       <section>
-        <Search />
+        <Search onIngredientsLoaded={handleIngredientsLoaded} />
         <IngredientList
           ingredients={ingredients}
           onRemoveItem={handleIngredientRemoved}
