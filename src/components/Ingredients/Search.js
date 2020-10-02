@@ -11,7 +11,7 @@ const Search = (props) => {
   const inputEle = useRef();
 
   useEffect(() => {
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       if (enteredFilter === inputEle.current.value) {
         const query =
           enteredFilter.length === 0
@@ -32,6 +32,7 @@ const Search = (props) => {
           });
       }
     }, 500);
+    return () => clearTimeout(timer);
   }, [enteredFilter, onIngredientsLoaded, inputEle]);
 
   return (
