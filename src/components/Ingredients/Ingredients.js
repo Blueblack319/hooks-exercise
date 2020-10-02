@@ -34,9 +34,13 @@ function Ingredients() {
   }, []);
 
   const handleIngredientRemoved = (id) => {
-    setIngredients((prevIngredients) =>
-      prevIngredients.filter((ing) => ing.id !== id)
-    );
+    fetch(`${BASE_URL}ingredients/${id}.json`, {
+      method: "DELETE",
+    }).then((res) => {
+      setIngredients((prevIngredients) =>
+        prevIngredients.filter((ing) => ing.id !== id)
+      );
+    });
   };
 
   return (
