@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useReducer } from "react";
+import React, { useCallback, useReducer } from "react";
 
 import IngredientForm from "./IngredientForm";
 import IngredientList from "./IngredientList";
@@ -16,17 +16,37 @@ const ingredientsReducer = (currentIngredients, action) => {
       return currentIngredients.concat(action.ingredient);
     case "REMOVE":
       return currentIngredients.filter((ing) => ing.id !== action.id);
+    default:
+      return new Error("Should not be reached!");
   }
 };
 
-function Ingredients() {
+const httpReducer = (currentHttpState, action) => {
+  switch (action.type) {
+    case "SEND":
+      return { loading: true, error: null };
+    case "RESPONSE":
+      return { ...currentHttpState, loading: false };
+    case "ERROR":
+      return { loading: false, error: action.errorMessage };
+    default:
+      return new Error("Should not be reached!");
+  }
+};
+
+const Ingredients = () => {
   // const [ingredients, setIngredients] = useState([]);
-  const [ingredients, ingredientsDispatch] = useReducer(ingredientsReducer, []);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(null);
+  const [ingredientsState, ingredientsDispatch] = useReducer(
+    ingredientsReducer,
+    []
+  );
+  const [httpState, httpDispatch] = useReducer(httpReducer, {
+    loading: false,
+    error: null,
+  });
 
   const handleIngredientAdded = (ingredient) => {
-    setIsLoading(true);
+    httpDispatch({ type: "SEND" });
     fetch(`${BASE_URL}ingredients.json`, {
       method: "post",
       headers: {
@@ -40,11 +60,10 @@ function Ingredients() {
           type: "ADD",
           ingredient: { id: ing.name, ...ingredient },
         });
-        setIsLoading(false);
+        httpDispatch({ type: "RESPONSE" });
       })
       .catch((err) => {
-        setIsError(err);
-        setIsLoading(false);
+        httpDispatch({ type: "ERROR", errorMessage: err.message });
       });
   };
 
@@ -53,44 +72,45 @@ function Ingredients() {
   }, []);
 
   const handleIngredientRemoved = (id) => {
-    setIsLoading(true);
+    httpDispatch({ type: "SEND" });
     fetch(`${BASE_URL}ingredients/${id}.json`, {
       method: "DELETE",
     })
       .then((res) => {
         ingredientsDispatch({ type: "REMOVE", id });
-        setIsLoading(false);
+        httpDispatch({ type: "RESPONSE" });
       })
       .catch((err) => {
-        setIsError(err);
-        setIsLoading(false);
+        console.log(err);
+        httpDispatch({ type: "ERROR", errorMessage: err.message });
       });
   };
 
   const handleErrorClosed = () => {
-    setIsError(null);
+    httpDispatch({ type: "ERROR", error: null });
   };
 
   return (
     <div className="App">
-      {isError && (
+      {httpState.error && (
         <ErrorModal onClose={handleErrorClosed}>
-          Something went wrong!
+          Something went wrong! <br />
+          {httpState.error}
         </ErrorModal>
       )}
       <IngredientForm
         onIngredientAdded={handleIngredientAdded}
-        isLoading={isLoading}
+        isLoading={httpState.loading}
       />
       <section>
         <Search onIngredientsLoaded={handleIngredientsLoaded} />
         <IngredientList
-          ingredients={ingredients}
+          ingredients={ingredientsState}
           onRemoveItem={handleIngredientRemoved}
         />
       </section>
     </div>
   );
-}
+};
 
 export default Ingredients;
