@@ -7,6 +7,9 @@ import LoadingIndicator from "../UI/LoadingIndicator";
 const IngredientForm = (props) => {
   const [enteredTitle, setEnteredTitle] = useState("");
   const [enteredAmount, setEnteredAmount] = useState("");
+
+  console.log("RENDERING INGREDIENT FORM");
+
   const handleFormSubmitted = (event) => {
     event.preventDefault();
     props.onIngredientAdded({ title: enteredTitle, amount: enteredAmount });
