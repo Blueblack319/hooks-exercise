@@ -23,44 +23,76 @@ const ingredientsReducer = (currentIngredients, action) => {
 };
 
 const Ingredients = () => {
-  const { isLoading, error, resData, sendRequest } = useHttp();
+  const {
+    isLoading,
+    error,
+    resData,
+    sendRequest,
+    reqExtra,
+    identifier,
+  } = useHttp();
+
   const [ingredientsState, ingredientsDispatch] = useReducer(
     ingredientsReducer,
     []
   );
 
   useEffect(() => {
-    console.log("RENDERING INGREDIENTS", ingredientsState);
-  }, [ingredientsState]);
+    if (!isLoading && !error && identifier === "REMOVE") {
+      ingredientsDispatch({ type: identifier, id: reqExtra });
+    }
+    if (!isLoading && !error && identifier === "ADD") {
+      ingredientsDispatch({
+        type: identifier,
+        ingredient: { id: resData.name, ...reqExtra },
+      });
+    }
+  }, [isLoading, error, identifier, reqExtra, resData]);
 
-  const handleIngredientAdded = useCallback((ingredient) => {
-    //   httpDispatch({ type: "SEND" });
-    //   fetch(`${BASE_URL}ingredients.json`, {
-    //     method: "post",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify(ingredient),
-    //   })
-    //     .then((res) => res.json())
-    //     .then((ing) => {
-    //       ingredientsDispatch({
-    //         type: "ADD",
-    //         ingredient: { id: ing.name, ...ingredient },
-    //       });
-    //       httpDispatch({ type: "RESPONSE" });
-    //     })
-    //     .catch((err) => {
-    //       httpDispatch({ type: "ERROR", errorMessage: err.message });
-    //     });
-    // }, []);
-    // const handleIngredientsLoaded = useCallback((loadedIngredients) => {
-    //   ingredientsDispatch({ type: "SET", ingredients: loadedIngredients });
+  const handleIngredientAdded = useCallback(
+    (ingredient) => {
+      sendRequest(
+        `${BASE_URL}ingredients.json`,
+        "POST",
+        JSON.stringify(ingredient),
+        ingredient,
+        "ADD"
+      );
+      //   httpDispatch({ type: "SEND" });
+      //   fetch(`${BASE_URL}ingredients.json`, {
+      //     method: "post",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //     },
+      //     body: JSON.stringify(ingredient),
+      //   })
+      //     .then((res) => res.json())
+      //     .then((ing) => {
+      //       ingredientsDispatch({
+      //         type: "ADD",
+      //         ingredient: { id: ing.name, ...ingredient },
+      //       });
+      //       httpDispatch({ type: "RESPONSE" });
+      //     })
+      //     .catch((err) => {
+      //       httpDispatch({ type: "ERROR", errorMessage: err.message });
+      //     });
+    },
+    [sendRequest]
+  );
+  const handleIngredientsLoaded = useCallback((loadedIngredients) => {
+    ingredientsDispatch({ type: "SET", ingredients: loadedIngredients });
   }, []);
 
   const handleIngredientRemoved = useCallback(
     (id) => {
-      sendRequest(`${BASE_URL}ingredients/${id}.json`, "DELETE");
+      sendRequest(
+        `${BASE_URL}ingredients/${id}.json`,
+        "DELETE",
+        null,
+        id,
+        "REMOVE"
+      );
     },
     [sendRequest]
   );
